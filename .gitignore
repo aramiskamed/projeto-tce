@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+.worktrees/
+.agy-tmp/
+playwright-report/
+test-results/
+.vercel/
+*.tsbuildinfo
+.vercel
+.env*
