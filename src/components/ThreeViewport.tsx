@@ -28,6 +28,18 @@ function toThreeGeometry(mesh: MeshData): THREE.BufferGeometry {
   return geo;
 }
 
+function disposeObject3D(obj: THREE.Object3D): void {
+  if (obj instanceof THREE.Mesh || obj instanceof THREE.LineSegments || obj instanceof THREE.Line) {
+    obj.geometry.dispose();
+    if (Array.isArray(obj.material)) {
+      obj.material.forEach((m) => m.dispose());
+    } else {
+      obj.material.dispose();
+    }
+  }
+  for (const child of obj.children) disposeObject3D(child);
+}
+
 export function ThreeViewport({
   kit,
   pipelineStage,
@@ -61,6 +73,8 @@ export function ThreeViewport({
   const pipelineStageRef = useRef<number>(pipelineStage);
   const explodePctRef = useRef<number>(explodePct);
   const animatingRef = useRef<boolean>(animating);
+  const titaniumFailureModeRef = useRef<boolean>(titaniumFailureMode);
+  const hasImportedMeshRef = useRef<boolean>(Boolean(importedMesh));
   const animPhaseRef = useRef<number>(0);
   const onAnimCbRef = useRef(onAnimationExplodeChange);
 
@@ -75,6 +89,14 @@ export function ThreeViewport({
   useEffect(() => {
     animatingRef.current = animating;
   }, [animating]);
+
+  useEffect(() => {
+    titaniumFailureModeRef.current = titaniumFailureMode;
+  }, [titaniumFailureMode]);
+
+  useEffect(() => {
+    hasImportedMeshRef.current = Boolean(importedMesh);
+  }, [importedMesh]);
 
   useEffect(() => {
     onAnimCbRef.current = onAnimationExplodeChange;
@@ -181,7 +203,12 @@ export function ThreeViewport({
     let lastUiSync = 0;
     const animate = (now: number) => {
       rafId = requestAnimationFrame(animate);
-      if (animatingRef.current) {
+      if (
+        animatingRef.current &&
+        pipelineStageRef.current >= 3 &&
+        !titaniumFailureModeRef.current &&
+        !hasImportedMeshRef.current
+      ) {
         animPhaseRef.current += 0.025;
         const osc = Math.round((Math.sin(animPhaseRef.current) * 0.5 + 0.5) * 100);
         explodePctRef.current = osc;
@@ -199,11 +226,18 @@ export function ThreeViewport({
     return () => {
       cancelAnimationFrame(rafId);
       resizeObserver.disconnect();
+      disposeObject3D(rootGroup);
+      disposeObject3D(grid);
+      disposeObject3D(helper);
       controls.dispose();
       renderer.dispose();
+      if (renderer.domElement.parentNode === container) {
+        container.removeChild(renderer.domElement);
+      }
       sceneRef.current = null;
       rendererRef.current = null;
       rootGroupRef.current = null;
+      clipHelperRef.current = null;
     };
   }, []);
 
@@ -213,21 +247,10 @@ export function ThreeViewport({
     if (!root) return;
 
     // Limpeza estrita de geometrias e materiais anteriores (zero memory leak WebGL)
-    const disposeObject = (obj: THREE.Object3D) => {
-      if (obj instanceof THREE.Mesh || obj instanceof THREE.LineSegments) {
-        obj.geometry.dispose();
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach((m) => m.dispose());
-        } else {
-          obj.material.dispose();
-        }
-      }
-      for (const child of obj.children) disposeObject(child);
-    };
     while (root.children.length > 0) {
       const child = root.children[0];
       root.remove(child);
-      disposeObject(child);
+      disposeObject3D(child);
     }
     implantMeshRef.current = null;
     lowerMoldMeshRef.current = null;

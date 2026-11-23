@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AlertTriangle, CheckCircle2, Printer, ShieldCheck, X } from 'lucide-react';
 import { SurgicalKitAudit } from '../engine/economics';
 
@@ -14,6 +15,23 @@ export function PrintProtocolModal({
   audit,
   onDownloadProtocol,
 }: PrintProtocolModalProps) {
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
@@ -22,6 +40,9 @@ export function PrintProtocolModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="protocol-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div className="w-full max-w-2xl rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3">

@@ -64,3 +64,20 @@ def test_bifrontal_locks_hemisphere_and_supports_anatomical_mode(tmp_path: Path)
     assert audit["exportOptions"]["bedFlat"] is False
     assert audit["lowerMold"]["isWatertight"] is True
     assert audit["upperMold"]["isWatertight"] is True
+
+
+def test_non_finite_parameters_are_sanitized(tmp_path: Path) -> None:
+    audit = generate_kit(
+        case_id="zygoma",
+        thickness_mm=float("nan"),
+        chamfer_mm=float("inf"),
+        clearance_mm=float("-inf"),
+        defect_scale=float("nan"),
+        outdir=str(tmp_path),
+    )
+    assert audit["parameters"]["thicknessMm"] == 4.0
+    assert audit["parameters"]["chamferMm"] == 2.0
+    assert audit["parameters"]["clearanceMm"] == 0.35
+    assert audit["parameters"]["defectScale"] == 1.0
+    assert audit["lowerMold"]["isWatertight"] is True
+    assert audit["upperMold"]["isWatertight"] is True

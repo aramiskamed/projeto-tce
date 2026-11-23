@@ -37,6 +37,10 @@ describe('STL Codec & ZIP Surgical Kit Packaging', () => {
     const parsed = parseSTLBuffer(buf);
     expect(parsed.triangleCount).toBe(1);
     expect(parsed.positions[3]).toBeCloseTo(10, 4);
+    // Normal zerada (0,0,0) no arquivo binário deve ser recalculada para +Z (0,0,1)
+    expect(parsed.normals[0]).toBeCloseTo(0, 4);
+    expect(parsed.normals[1]).toBeCloseTo(0, 4);
+    expect(parsed.normals[2]).toBeCloseTo(1, 4);
   });
 
   it('parses valid ASCII STL cleanly', () => {

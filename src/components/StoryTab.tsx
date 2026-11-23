@@ -1,20 +1,18 @@
 import { useState } from 'react';
-import { ArrowRight, Check, Copy, ExternalLink, Film, ShieldAlert } from 'lucide-react';
-import { AVATAR_SCRIPT_BLOCKS, JOURNEY_STEPS, SIGTAP_ROWS } from '../data/clinicalData';
+import { ArrowRight, ExternalLink, Film, PlayCircle, ShieldAlert } from 'lucide-react';
+import { JOURNEY_STEPS, SIGTAP_ROWS } from '../data/clinicalData';
 import { formatBRL } from '../engine/economics';
 import { ClinicalCharts } from './ClinicalCharts';
 
 interface StoryTabProps {
   onOpenStudio: (opts?: { stage?: 1 | 2 | 3 | 4; titanium?: boolean }) => void;
-  onNotify: (msg: string) => void;
 }
 
-export function StoryTab({ onOpenStudio, onNotify }: StoryTabProps) {
+export function StoryTab({ onOpenStudio }: StoryTabProps) {
   const [journeyIdx, setJourneyIdx] = useState(0);
   const [simCases, setSimCases] = useState(50);
   const [cementUnit, setCementUnit] = useState(145.42);
   const [opmeRef, setOpmeRef] = useState(160000);
-  const [copied, setCopied] = useState(false);
 
   const activeStep = JOURNEY_STEPS[journeyIdx];
   const baseUrl = import.meta.env.BASE_URL;
@@ -39,18 +37,6 @@ export function StoryTab({ onOpenStudio, onNotify }: StoryTabProps) {
       : activeStep.badgeTone === 'amber'
         ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
         : 'bg-rose-500/15 text-rose-300 border-rose-500/30';
-
-  const handleCopyScript = async () => {
-    const rawText = AVATAR_SCRIPT_BLOCKS.map((b) => b.text).join('\n\n');
-    try {
-      await navigator.clipboard.writeText(rawText);
-      setCopied(true);
-      onNotify('Locução fonética copiada para a área de transferência.');
-      setTimeout(() => setCopied(false), 2400);
-    } catch {
-      onNotify('Não foi possível copiar automaticamente. Selecione o texto manualmente.');
-    }
-  };
 
   return (
     <main className="flex-1">
@@ -90,11 +76,11 @@ export function StoryTab({ onOpenStudio, onNotify }: StoryTabProps) {
                 <ArrowRight className="w-4 h-4" />
               </button>
               <a
-                href="#secao-video-avatar"
+                href="#secao-video-pitch"
                 className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-sm sm:text-base border border-slate-700 transition inline-flex items-center gap-2"
               >
-                <Film className="w-4 h-4 text-sky-400" />
-                <span>Roteiro Pitch (2min52s)</span>
+                <PlayCircle className="w-4 h-4 text-sky-400" />
+                <span>Assistir Vídeo Pitch (2min44s)</span>
               </a>
             </div>
 
@@ -540,20 +526,71 @@ export function StoryTab({ onOpenStudio, onNotify }: StoryTabProps) {
         </div>
       </section>
 
-      {/* SECTION 5: AVATAR VIDEO STORYBOARD & TELEPROMPTER */}
-      <section id="secao-video-avatar" className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-5 space-y-4">
-            <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">
-              Vídeo Pitch · Avatar + Screencast (2min52s)
+      {/* SECTION 5: OFFICIAL PITCH VIDEO FOR JUDGES */}
+      <section
+        id="secao-video-pitch"
+        className="scroll-mt-36 md:scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 py-14"
+      >
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div className="space-y-2 max-w-3xl">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-sky-400">
+              <Film className="w-3.5 h-3.5" />
+              Vídeo Pitch Oficial · Hack Brasil 2026 (2min44s)
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold text-white">
-              Roteiro de gravação sincronizado com o Studio 3D
+              Apresentação do CranioMold 3D para a Banca Avaliadora
             </h2>
             <p className="text-sm text-slate-300 leading-relaxed">
-              Estruturado dentro do teto oficial de 3 minutos do Hack Brasil 2026, com grafia
-              fonética pronta para locução e salto imediato para a demonstração ao vivo do Ato 3.
+              Assista à demonstração completa dentro do teto oficial de 3 minutos do Hack Brasil
+              2026: contexto clínico, comparativo de falha das placas não prototipadas, geração do
+              molde negativo bipartido 3D e viabilidade econômica dentro da AIH do SUS.
             </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onOpenStudio({ stage: 3, titanium: false })}
+              className="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs sm:text-sm transition inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Testar Studio CAD 3D</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 glass-panel rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div className="relative bg-black aspect-video">
+              <video
+                id="pitch-video-player"
+                controls
+                playsInline
+                preload="metadata"
+                poster={`${baseUrl}assets/kit-cranioplastia-3d.jpg`}
+                aria-label="Vídeo pitch oficial do CranioMold 3D para os jurados do Hack Brasil 2026"
+                className="w-full h-full object-contain bg-black"
+              >
+                <source src={`${baseUrl}assets/pitch-craniomold-3d.mp4`} type="video/mp4" />
+                Seu navegador não suporta a reprodução embutida de vídeo MP4.{' '}
+                <a
+                  href={`${baseUrl}assets/pitch-craniomold-3d.mp4`}
+                  className="text-sky-400 underline"
+                >
+                  Baixar vídeo pitch (.mp4)
+                </a>
+                .
+              </video>
+            </div>
+            <div className="px-4 py-3 bg-slate-900/95 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+              <span>
+                Narrativa clínica ilustrativa · Demonstração executada sobre phantom 3D 100%
+                sintético (Item 6.9).
+              </span>
+              <span className="font-mono-tech text-sky-400 shrink-0">1080p · H.264 · 2min44s</span>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 space-y-4">
             <div className="rounded-2xl overflow-hidden border border-slate-800 bg-slate-900">
               <img
                 src={`${baseUrl}assets/espelhamento-sagital-cad.jpg`}
@@ -561,57 +598,36 @@ export function StoryTab({ onOpenStudio, onNotify }: StoryTabProps) {
                 className="w-full h-auto block"
               />
               <div className="p-3.5 text-xs text-slate-400 border-t border-slate-800">
-                Ato 3 (1:25–2:25): Espelhamento sagital eliminando quinas metálicas sob o retalho.
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-7 glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-              <div>
-                <h3 className="font-bold text-white text-base">
-                  Locução Fonética Completa para Avatar (~415 palavras)
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Acrônimos ajustados foneticamente (três D, S-T-L, P-M-M-A) para PT-BR natural
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleCopyScript}
-                  className="px-3.5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? 'Copiado!' : 'Copiar Roteiro'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onOpenStudio({ stage: 3, titanium: false })}
-                  className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition cursor-pointer"
-                >
-                  Gravar Ato 3 →
-                </button>
+                Espelhamento sagital contralateral: reconstrução anatômica contínua sem quinas
+                metálicas sob o retalho cutâneo.
               </div>
             </div>
 
-            <div className="space-y-3 text-sm text-slate-200 leading-relaxed max-h-96 overflow-y-auto pr-2">
-              {AVATAR_SCRIPT_BLOCKS.map((blk) => {
-                const tagColor =
-                  blk.tone === 'sky'
-                    ? 'text-sky-400'
-                    : blk.tone === 'rose'
-                      ? 'text-rose-400'
-                      : blk.tone === 'amber'
-                        ? 'text-amber-300'
-                        : 'text-emerald-400';
-                return (
-                  <p key={blk.tag}>
-                    <strong className={`${tagColor} font-mono-tech text-xs`}>{blk.tag}</strong>{' '}
-                    {blk.text}
-                  </p>
-                );
-              })}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <div className="text-xs font-mono-tech uppercase tracking-wider text-emerald-400 font-semibold">
+                Explore ao Vivo após o Vídeo
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Cada etapa exibida no vídeo pode ser manipulada em tempo real no Studio 3D:
+                altere a espessura do implante, ative o corte transversal e baixe os arquivos{' '}
+                <code className="text-sky-300">.STL</code> prontos para impressão FDM.
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => onOpenStudio({ stage: 4, titanium: false })}
+                  className="w-full py-2 px-3 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-xs font-semibold transition cursor-pointer"
+                >
+                  Abrir Kit Completo Explodido →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenStudio({ stage: 1, titanium: true })}
+                  className="w-full py-2 px-3 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-200 border border-rose-500/35 text-xs font-semibold transition cursor-pointer"
+                >
+                  Comparar Falha de Titânio vs PMMA →
+                </button>
+              </div>
             </div>
           </div>
         </div>

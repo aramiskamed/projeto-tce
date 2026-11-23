@@ -1,0 +1,127 @@
+{
+  "slug": "20261123-projeto-tce",
+  "target_url": "https://projeto-tce-ebon.vercel.app",
+  "repo": "/opt/projeto-tce",
+  "scope": "full",
+  "viewports": ["desktop:1280x800", "mobile:390x844"],
+  "created_at": "2026-11-23T02:32:00Z",
+  "counts": {
+    "critical": 0,
+    "high": 3,
+    "medium": 5,
+    "low": 2
+  },
+  "summary": "Bug-hunt completo (Playwright Desktop+Mobile + Auditoria de Código) identificou 10 defeitos reais (3 HIGH, 5 MEDIUM, 2 LOW); todos os 10 defeitos foram corrigidos e revalidados com Quality Gate e Playwright.",
+  "findings": [
+    {
+      "id": "BH-001",
+      "severity": "HIGH",
+      "perspective": "User+Dev",
+      "status": "fixed",
+      "title": "Sobreposição de banners contextuais (Titânio / STL Importado) sobre controles de câmera 3D (Desktop e Mobile)",
+      "files": ["src/components/Studio3DTab.tsx"],
+      "evidence": [
+        "/opt/aralab/bridge/work-screenshots/bug-hunt-20261123-projeto-tce/04-desktop-titanium-mode.png",
+        "/opt/aralab/bridge/work-screenshots/bug-hunt-20261123-projeto-tce/10-mobile-studio3d-titanium-overlap.png",
+        "/opt/aralab/bridge/work-screenshots/bug-hunt-20261123-projeto-tce/04-desktop-titanium-mode-fixed.png",
+        "/opt/aralab/bridge/work-screenshots/bug-hunt-20261123-projeto-tce/10-mobile-studio3d-titanium-fixed.png"
+      ],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-002",
+      "severity": "HIGH",
+      "perspective": "Dev",
+      "status": "fixed",
+      "title": "STL binário com normais zeradas (0,0,0) renderiza completamente preto no viewport 3D",
+      "files": ["src/engine/stlCodec.ts", "src/__tests__/stlCodec.test.ts"],
+      "evidence": ["Unit test stlCodec.test.ts"],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-003",
+      "severity": "HIGH",
+      "perspective": "User+Dev",
+      "status": "fixed",
+      "title": "Animação de prensagem (60 FPS) continua mutando estado após sair das etapas de molde",
+      "files": ["src/components/Studio3DTab.tsx", "src/components/ThreeViewport.tsx"],
+      "evidence": ["Playwright animationBugOnStage1: keptMutatingOnStage1 true -> false"],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-004",
+      "severity": "MEDIUM",
+      "perspective": "User+Dev",
+      "status": "fixed",
+      "title": "Modal PrintProtocolModal não fecha com Escape, clique no backdrop e não trava scroll do fundo",
+      "files": ["src/components/PrintProtocolModal.tsx"],
+      "evidence": [
+        "/opt/aralab/bridge/work-screenshots/bug-hunt-20261123-projeto-tce/06-desktop-protocol-modal.png"
+      ],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-005",
+      "severity": "MEDIUM",
+      "perspective": "User+Dev",
+      "status": "fixed",
+      "title": "Navegação entre abas pelo cabeçalho não reposiciona o scroll para o topo",
+      "files": ["src/App.tsx"],
+      "evidence": [
+        "/opt/aralab/bridge/work-screenshots/bug-hunt-20261123-projeto-tce/03-desktop-studio3d.png",
+        "/opt/aralab/bridge/work-screenshots/bug-hunt-20261123-projeto-tce/03-desktop-studio3d-fixed.png"
+      ],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-006",
+      "severity": "MEDIUM",
+      "perspective": "Dev",
+      "status": "fixed",
+      "title": "Vazamento de geometrias/materiais WebGL ao desmontar ThreeViewport",
+      "files": ["src/components/ThreeViewport.tsx"],
+      "evidence": ["Code audit ThreeViewport cleanup effect"],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-007",
+      "severity": "MEDIUM",
+      "perspective": "User+Dev",
+      "status": "fixed",
+      "title": "Upload de STL lê arquivos >25 MB em RAM antes de validar, ignora reader.onerror e mantém alerta preso",
+      "files": ["src/components/Studio3DTab.tsx"],
+      "evidence": ["Playwright stlUpload + code audit handleStlUpload"],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-008",
+      "severity": "MEDIUM",
+      "perspective": "User+Dev",
+      "status": "fixed",
+      "title": "Inconsistência de numeração dos Atos clínicos entre Aba 1 (Ato 03 / Ato 04) e Studio 3D (Ato 2 vs Ato 3)",
+      "files": ["src/components/Studio3DTab.tsx"],
+      "evidence": ["Playwright mentionsAto2InStudio true -> false"],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-009",
+      "severity": "LOW",
+      "perspective": "User+Dev",
+      "status": "fixed",
+      "title": "Âncora #secao-video-pitch sem scroll-margin-top compensando cabeçalho sticky em Mobile",
+      "files": ["src/components/StoryTab.tsx"],
+      "evidence": ["Mobile headerHeight=131px"],
+      "linear_issue": null
+    },
+    {
+      "id": "BH-010",
+      "severity": "LOW",
+      "perspective": "Dev",
+      "status": "fixed",
+      "title": "CLI Python não sanitizava parâmetros NaN/inf antes de clamp",
+      "files": ["engine/cranio_mold_cli.py", "tests/test_cranio_mold_cli.py"],
+      "evidence": ["Pytest test_non_finite_parameters_are_sanitized"],
+      "linear_issue": null
+    }
+  ]
+}

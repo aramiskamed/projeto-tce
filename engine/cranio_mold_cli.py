@@ -120,7 +120,13 @@ CASES: dict[str, DefectCaseConfig] = {
 }
 
 
+def _finite_or(v: float, default: float) -> float:
+    return v if math.isfinite(v) else default
+
+
 def clamp(v: float, lo: float, hi: float) -> float:
+    if not math.isfinite(v):
+        return lo
     return max(lo, min(hi, v))
 
 
@@ -365,10 +371,10 @@ def generate_kit(
 ) -> dict:
     cfg = CASES[case_id]
     eff_hemi = "right" if cfg.is_bilateral else hemisphere
-    defect_scale = clamp(defect_scale, 0.70, 1.20)
-    thickness_mm = clamp(thickness_mm, 2.8, 5.0)
-    chamfer_mm = clamp(chamfer_mm, 0.5, 3.0)
-    clearance_mm = clamp(clearance_mm, 0.20, 0.50)
+    defect_scale = clamp(_finite_or(defect_scale, 1.0), 0.70, 1.20)
+    thickness_mm = clamp(_finite_or(thickness_mm, 4.0), 2.8, 5.0)
+    chamfer_mm = clamp(_finite_or(chamfer_mm, 2.0), 0.5, 3.0)
+    clearance_mm = clamp(_finite_or(clearance_mm, 0.35), 0.20, 0.50)
 
     hemi_sign = 1.0 if cfg.is_bilateral or eff_hemi == "right" else -1.0
     eff_theta = cfg.theta_center * hemi_sign

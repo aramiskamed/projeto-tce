@@ -72,7 +72,7 @@ Executa: ESLint (`npm run lint`), TypeScript (`tsc --noEmit`), Vitest + cobertur
 - `engine/cranio_mold_cli.py` + `tests/test_cranio_mold_cli.py` — CLI Python em paridade matemática + testes pytest
 - `samples/` — Arquivos `.STL` binários apoiados em `Z = 0` e `audit_craniectomy18.json` (v2.0) pré-gerados para inspeção imediata em PrusaSlicer / OrcaSlicer / Cura
 - `docs/specs/projeto-tce-craniomold/SPEC.md` — Especificação técnica revisada e auditada
-- `docs/ROTEIRO_VIDEO_AVATAR.md` — Roteiro cronometrado de 2min52s para vídeo pitch
+- `public/assets/pitch-craniomold-3d.mp4` — Vídeo Pitch oficial (2min44s) embutido no portal para avaliação dos jurados
 
 ## 5. Licença
 Distribuído sob a licença **MIT** ([`LICENSE`](LICENSE)).

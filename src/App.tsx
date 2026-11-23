@@ -27,6 +27,11 @@ export default function App() {
     };
   }, []);
 
+  const handleSelectTab = useCallback((tab: ActiveTab) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const handleOpenStudio = useCallback(
     (opts?: { stage?: 1 | 2 | 3 | 4; titanium?: boolean }) => {
       setStudioPreset((prev) => ({
@@ -71,7 +76,8 @@ export default function App() {
             <button
               id="nav-tab-story"
               type="button"
-              onClick={() => setActiveTab('story')}
+              aria-current={activeTab === 'story' ? 'page' : undefined}
+              onClick={() => handleSelectTab('story')}
               className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'story'
                   ? 'bg-sky-500 text-slate-950 shadow-sm'
@@ -83,7 +89,8 @@ export default function App() {
             <button
               id="nav-tab-demo"
               type="button"
-              onClick={() => setActiveTab('demo')}
+              aria-current={activeTab === 'demo' ? 'page' : undefined}
+              onClick={() => handleSelectTab('demo')}
               className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === 'demo'
                   ? 'bg-sky-500 text-slate-950 shadow-sm'
@@ -110,7 +117,7 @@ export default function App() {
 
       {/* ACTIVE VIEW */}
       {activeTab === 'story' ? (
-        <StoryTab onOpenStudio={handleOpenStudio} onNotify={notify} />
+        <StoryTab onOpenStudio={handleOpenStudio} />
       ) : (
         <Studio3DTab
           key={studioPreset.key}

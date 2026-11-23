@@ -12,6 +12,7 @@ import {
   Upload,
   AlertTriangle,
   RotateCcw,
+  X,
 } from 'lucide-react';
 import {
   CASE_ORDER,
@@ -30,7 +31,7 @@ import {
 } from '../engine/economics';
 import { MeshTopologyAudit, auditMeshTopology } from '../engine/meshAudit';
 import { MeshData, generateSurgicalKit } from '../engine/meshBuilder';
-import { buildZipArchive, encodeBinarySTL, parseSTLBuffer } from '../engine/stlCodec';
+import { STL_LIMITS, buildZipArchive, encodeBinarySTL, parseSTLBuffer } from '../engine/stlCodec';
 import { PrintProtocolModal } from './PrintProtocolModal';
 import { CameraPreset, ThreeViewport } from './ThreeViewport';
 
@@ -118,7 +119,7 @@ export function Studio3DTab({
   const hudLabel = importedStl
     ? `Malha .STL Sintética Importada: ${importedStl.filename}`
     : titaniumFailureMode
-      ? 'Comparativo Ato 2: Placa de Titânio Não Prototipada (Pontos Vermelhos de Úlcera)'
+      ? 'Comparativo Ato 03: Placa de Titânio Não Prototipada (Pontos Vermelhos de Úlcera)'
       : pipelineStage === 1
         ? 'Etapa 1: TC Fase Óssea — Casca Craniana Fechada com Falha Cortical'
         : pipelineStage === 2
@@ -217,13 +218,31 @@ export function Studio3DTab({
     e.target.value = '';
     if (!file) return;
     setImportError(null);
+    if (file.size === 0) {
+      const msg = 'Arquivo STL vazio.';
+      setImportError(msg);
+      onNotify(msg);
+      return;
+    }
+    if (file.size > STL_LIMITS.MAX_FILE_BYTES) {
+      const msg = 'Arquivo STL excede o limite de segurança de 25 MB.';
+      setImportError(msg);
+      onNotify(msg);
+      return;
+    }
     const reader = new FileReader();
+    reader.onerror = () => {
+      const msg = 'Não foi possível ler o arquivo .STL selecionado.';
+      setImportError(msg);
+      onNotify(msg);
+    };
     reader.onload = () => {
       try {
         const buf = reader.result;
         if (!(buf instanceof ArrayBuffer)) throw new Error('Leitura inválida.');
         const mesh = parseSTLBuffer(buf);
         const meshAudit = auditMeshTopology(mesh, 0);
+        setAnimating(false);
         setImportedStl({ filename: file.name, mesh, audit: meshAudit });
         setMirrorImported(false);
         onNotify(`Malha sintética ${file.name} carregada localmente (${mesh.triangleCount} tris).`);
@@ -264,6 +283,7 @@ export function Studio3DTab({
               value={params.caseId}
               onChange={(e) => {
                 setImportedStl(null);
+                setImportError(null);
                 setTitaniumFailureMode(false);
                 const nextId = e.target.value as CaseId;
                 const isBilat = SYNTHETIC_CASES[nextId].isBilateral;
@@ -310,9 +330,19 @@ export function Studio3DTab({
         </div>
 
         {importError && (
-          <div className="p-3 rounded-xl bg-rose-950/70 border border-rose-500/40 text-xs text-rose-200 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
-            <span>{importError}</span>
+          <div className="p-3 rounded-xl bg-rose-950/70 border border-rose-500/40 text-xs text-rose-200 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{importError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setImportError(null)}
+              aria-label="Dispensar alerta de importação"
+              className="p-1 rounded-md text-rose-300 hover:text-white hover:bg-rose-900/60 transition cursor-pointer shrink-0"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
@@ -338,7 +368,9 @@ export function Studio3DTab({
                 type="button"
                 onClick={() => {
                   setImportedStl(null);
+                  setImportError(null);
                   setTitaniumFailureMode(false);
+                  if (st.id < 3) setAnimating(false);
                   setPipelineStage(st.id);
                 }}
                 className={`text-left p-3 rounded-xl border transition cursor-pointer ${
@@ -359,86 +391,91 @@ export function Studio3DTab({
           {/* 3D VIEWPORT COLUMN */}
           <div className="lg:col-span-8 flex flex-col gap-4">
             <div className="flex flex-col rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden relative min-h-[460px] sm:min-h-[560px]">
-              {/* Top HUD */}
-              <div className="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-                <div className="pointer-events-auto inline-flex items-center gap-2 bg-slate-950/90 border border-slate-800 px-3 py-1.5 rounded-xl text-xs max-w-lg">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                  <span className="font-medium text-slate-200 truncate">{hudLabel}</span>
+              {/* Top HUD & Contextual Banners (stacked in flow to prevent overlap) */}
+              <div className="absolute top-3 left-3 right-3 z-10 flex flex-col gap-2 pointer-events-none">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="pointer-events-auto inline-flex items-center gap-2 bg-slate-950/90 border border-slate-800 px-3 py-1.5 rounded-xl text-xs min-w-0 max-w-full sm:max-w-lg">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                    <span className="font-medium text-slate-200 truncate">{hudLabel}</span>
+                  </div>
+
+                  <div className="pointer-events-auto flex flex-wrap items-center gap-1.5">
+                    {(
+                      [
+                        ['front', 'Frontal'],
+                        ['side', 'Lateral'],
+                        ['top', 'Superior'],
+                        ['back', 'Posterior'],
+                      ] as [CameraPreset, string][]
+                    ).map(([preset, lbl]) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => requestCam(preset)}
+                        className="px-2.5 py-1.5 rounded-lg bg-slate-950/90 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-medium transition cursor-pointer"
+                      >
+                        {lbl}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImportedStl(null);
+                        setImportError(null);
+                        requestCam('default');
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-950/90 hover:bg-slate-800 text-sky-300 border border-slate-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="pointer-events-auto flex flex-wrap items-center gap-1.5">
-                  {(
-                    [
-                      ['front', 'Frontal'],
-                      ['side', 'Lateral'],
-                      ['top', 'Superior'],
-                      ['back', 'Posterior'],
-                    ] as [CameraPreset, string][]
-                  ).map(([preset, lbl]) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => requestCam(preset)}
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-950/90 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-medium transition cursor-pointer"
-                    >
-                      {lbl}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImportedStl(null);
-                      requestCam('default');
-                    }}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-950/90 hover:bg-slate-800 text-sky-300 border border-slate-700 text-xs font-medium transition inline-flex items-center gap-1 cursor-pointer"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>Reset</span>
-                  </button>
-                </div>
+                {/* Titanium Failure Warning Banner */}
+                {titaniumFailureMode && !importedStl && (
+                  <div className="pointer-events-auto bg-rose-950/92 border border-rose-500/50 rounded-xl px-3.5 py-2.5 text-xs text-rose-100 shadow-lg">
+                    <strong className="text-rose-300">Modo Comparativo Ativo (Falha do Ato 03):</strong>{' '}
+                    Pontos vermelhos indicam pressão localizada das quinas vivas da placa de titânio
+                    não prototipada contra o couro cabeludo — causando isquemia, ulceração e infecção.
+                  </div>
+                )}
+
+                {/* Imported STL Bar */}
+                {importedStl && (
+                  <div className="pointer-events-auto bg-sky-950/92 border border-sky-500/40 rounded-xl px-3.5 py-2.5 text-xs text-sky-100 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+                    <div>
+                      <strong>{importedStl.filename}</strong> ·{' '}
+                      {importedStl.audit.triangleCount.toLocaleString('pt-BR')} tris · BBox{' '}
+                      {importedStl.audit.bboxMm.x}×{importedStl.audit.bboxMm.y}×
+                      {importedStl.audit.bboxMm.z} mm ·{' '}
+                      {importedStl.audit.isWatertight
+                        ? 'Manifold OK'
+                        : `${importedStl.audit.boundaryEdges} arestas abertas`}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMirrorImported((m) => !m)}
+                        className={`px-2.5 py-1 rounded-lg border font-semibold transition cursor-pointer ${
+                          mirrorImported
+                            ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                            : 'bg-slate-900 text-emerald-300 border-emerald-500/40'
+                        }`}
+                      >
+                        Espelhar Sagital: {mirrorImported ? 'ON' : 'OFF'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setImportedStl(null)}
+                        className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold cursor-pointer"
+                      >
+                        Voltar ao Phantom
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {/* Titanium Failure Warning Banner */}
-              {titaniumFailureMode && !importedStl && (
-                <div className="absolute top-14 left-3 right-3 z-10 bg-rose-950/92 border border-rose-500/50 rounded-xl px-3.5 py-2.5 text-xs text-rose-100 shadow-lg">
-                  <strong className="text-rose-300">Modo Comparativo Ativo (Falha do Ato 2):</strong>{' '}
-                  Pontos vermelhos indicam pressão localizada das quinas vivas da placa de titânio
-                  não prototipada contra o couro cabeludo — causando isquemia, ulceração e infecção.
-                </div>
-              )}
-
-              {/* Imported STL Bar */}
-              {importedStl && (
-                <div className="absolute top-14 left-3 right-3 z-10 bg-sky-950/92 border border-sky-500/40 rounded-xl px-3.5 py-2.5 text-xs text-sky-100 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-                  <div>
-                    <strong>{importedStl.filename}</strong> ·{' '}
-                    {importedStl.audit.triangleCount.toLocaleString('pt-BR')} tris · BBox{' '}
-                    {importedStl.audit.bboxMm.x}×{importedStl.audit.bboxMm.y}×
-                    {importedStl.audit.bboxMm.z} mm ·{' '}
-                    {importedStl.audit.isWatertight ? 'Manifold OK' : `${importedStl.audit.boundaryEdges} arestas abertas`}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setMirrorImported((m) => !m)}
-                      className={`px-2.5 py-1 rounded-lg border font-semibold transition cursor-pointer ${
-                        mirrorImported
-                          ? 'bg-emerald-500 text-slate-950 border-emerald-400'
-                          : 'bg-slate-900 text-emerald-300 border-emerald-500/40'
-                      }`}
-                    >
-                      Espelhar Sagital: {mirrorImported ? 'ON' : 'OFF'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setImportedStl(null)}
-                      className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold cursor-pointer"
-                    >
-                      Voltar ao Phantom
-                    </button>
-                  </div>
-                </div>
-              )}
 
               <ThreeViewport
                 kit={kit}
@@ -621,14 +658,19 @@ export function Studio3DTab({
             {/* ANTI-ULCERATION COMPARISON TOGGLE */}
             <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2.5">
               <div className="text-xs font-mono-tech text-rose-300 font-semibold">
-                COMPARATIVO CLÍNICO (ATO 2 vs ATO 3)
+                COMPARATIVO CLÍNICO (ATO 03 vs ATO 04)
               </div>
               <button
                 id="toggle-titanium-btn"
                 type="button"
                 onClick={() => {
                   setImportedStl(null);
-                  setTitaniumFailureMode((v) => !v);
+                  setImportError(null);
+                  setTitaniumFailureMode((v) => {
+                    const next = !v;
+                    if (next) setAnimating(false);
+                    return next;
+                  });
                 }}
                 className="w-full py-2.5 px-3.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-200 border border-rose-500/40 text-xs font-semibold transition flex items-center justify-between cursor-pointer"
               >

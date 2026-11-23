@@ -83,35 +83,6 @@ export const JOURNEY_STEPS: JourneyStep[] = [
   },
 ];
 
-export interface AvatarScriptBlock {
-  tag: string;
-  tone: 'sky' | 'rose' | 'amber' | 'emerald';
-  text: string;
-}
-
-export const AVATAR_SCRIPT_BLOCKS: AvatarScriptBlock[] = [
-  {
-    tag: '[0:00 – 0:45 · ATO 1]',
-    tone: 'sky',
-    text: 'Imagine uma mulher jovem, de dezoito anos, voltando do trabalho de moto, quando um motorista alcoolizado invade a pista e colide contra ela. Ela chega gravíssima ao hospital com traumatismo craniano severo e precisa de uma craniectomia descompressiva de emergência — retirando grande parte da calota craniana para salvar sua vida. Ela sobrevive, mas passa meses hospitalizada em reabilitação neurofuncional, com a recuperação motora e cognitiva travada pela síndrome do trefinado: sem o osso, a pressão atmosférica comprime diretamente o cérebro, roubando força, fala e autonomia. Assim como ela, trinta mil brasileiros entram nessa fila todo ano.',
-  },
-  {
-    tag: '[0:45 – 1:25 · ATO 2]',
-    tone: 'rose',
-    text: 'Uma prótese sob medida industrial resolveria o contorno, mas custa entre cem e duzentos mil reais — inviável quando a tabela do SUS paga mil trezentos e vinte e dois reais pela cirurgia inteira. Na tentativa de tirá-la da fila, a equipe recorre a um implante adaptado com placas de titânio não prototipadas. Mas sem a curvatura anatômica exata, as pontas metálicas pressionam e ulceram a pele fina, a ferida operatória infecta, e o implante inteiro precisa ser removido no centro cirúrgico — devolvendo uma jovem de dezoito anos à estaca zero.',
-  },
-  {
-    tag: '[1:25 – 2:25 · ATO 3 · SCREENCAST ABA 2]',
-    tone: 'amber',
-    text: 'Para mudar esse desfecho em qualquer hospital público, criamos nossa plataforma de prototipagem por molde negativo em três D. Veja funcionando ao vivo na aba de demonstração sobre um modelo sintético equivalente ao defeito dessa paciente: a partir da tomografia em fase óssea, o algoritmo isola as bordas da falha, calcula o plano de simetria sagital e espelha o lado íntegro do crânio ou da face, reconstruindo uma superfície orgânica contínua, com quatro milímetros de espessura e zero quinas vivas sob a pele. Em segundos, ele escava o molde negativo bipartido com pinos cônicos anti-erro, encaixes correspondentes e canais de escape, exportando os arquivos S-T-L prontos e apoiados planos para uma impressora três D comum.',
-  },
-  {
-    tag: '[2:25 – 2:55 · ATO 4]',
-    tone: 'emerald',
-    text: 'No centro cirúrgico, o cimento ósseo de P-M-M-A — que o SUS já paga por cento e quarenta e cinco reais — cura fora do corpo, dentro do molde estéril, sem risco térmico para o cérebro. O custo cai para menos de oitocentos reais: mais de noventa e nove por cento de economia. Com a prótese prototipada, a pele da jovem cicatriza sem tensão, o implante funciona, a síndrome do trefinado regride e a reabilitação neurofuncional finalmente avança — devolvendo o contorno, a proteção e o futuro aos dezoito anos.',
-  },
-];
-
 export const SIGTAP_ROWS = [
   {
     code: '04.03.01.001-2',

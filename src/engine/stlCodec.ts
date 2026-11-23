@@ -98,9 +98,9 @@ export function parseSTLBuffer(buffer: ArrayBuffer): MeshData {
     let offset = 84;
 
     for (let i = 0; i < binaryTriCount; i++) {
-      const nx = dv.getFloat32(offset, true);
-      const ny = dv.getFloat32(offset + 4, true);
-      const nz = dv.getFloat32(offset + 8, true);
+      let nx = dv.getFloat32(offset, true);
+      let ny = dv.getFloat32(offset + 4, true);
+      let nz = dv.getFloat32(offset + 8, true);
 
       const base = i * 9;
       for (let v = 0; v < 3; v++) {
@@ -114,10 +114,47 @@ export function parseSTLBuffer(buffer: ArrayBuffer): MeshData {
         positions[base + v * 3] = vx;
         positions[base + v * 3 + 1] = vy;
         positions[base + v * 3 + 2] = vz;
+      }
 
-        normals[base + v * 3] = Number.isFinite(nx) ? nx : 0;
-        normals[base + v * 3 + 1] = Number.isFinite(ny) ? ny : 0;
-        normals[base + v * 3 + 2] = Number.isFinite(nz) ? nz : 1;
+      // Recalcula normal geométrica se o exportador gravou (0,0,0) ou valores não-finitos
+      const nSq =
+        Number.isFinite(nx) && Number.isFinite(ny) && Number.isFinite(nz)
+          ? nx * nx + ny * ny + nz * nz
+          : 0;
+      if (nSq < 1e-12) {
+        const ax = positions[base];
+        const ay = positions[base + 1];
+        const az = positions[base + 2];
+        const bx = positions[base + 3] - ax;
+        const by = positions[base + 4] - ay;
+        const bz = positions[base + 5] - az;
+        const cx = positions[base + 6] - ax;
+        const cy = positions[base + 7] - ay;
+        const cz = positions[base + 8] - az;
+        const gnx = by * cz - bz * cy;
+        const gny = bz * cx - bx * cz;
+        const gnz = bx * cy - by * cx;
+        const gLen = Math.sqrt(gnx * gnx + gny * gny + gnz * gnz);
+        if (gLen > 1e-12) {
+          nx = gnx / gLen;
+          ny = gny / gLen;
+          nz = gnz / gLen;
+        } else {
+          nx = 0;
+          ny = 0;
+          nz = 1;
+        }
+      } else {
+        const nLen = Math.sqrt(nSq);
+        nx /= nLen;
+        ny /= nLen;
+        nz /= nLen;
+      }
+
+      for (let v = 0; v < 3; v++) {
+        normals[base + v * 3] = nx;
+        normals[base + v * 3 + 1] = ny;
+        normals[base + v * 3 + 2] = nz;
       }
       offset += 50;
     }
