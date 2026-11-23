@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "2.0",
+  "syntheticCompliance": "100% synthetic mathematical phantom — zero patient data (Hack Brasil 2026 item 6.9)",
+  "generatedAtIso": "2026-11-23T01:20:38.867719+00:00",
+  "parameters": {
+    "caseId": "craniectomy18",
+    "hemisphere": "right",
+    "defectScale": 1.0,
+    "uShiftMm": 0.0,
+    "vShiftMm": 0.0,
+    "thicknessMm": 4.0,
+    "chamferMm": 2.0,
+    "clearanceMm": 0.35,
+    "includeDrainageDimples": true
+  },
+  "exportOptions": {
+    "bedFlat": true
+  },
+  "implant": {
+    "triangleCount": 12992,
+    "signedVolumeCm3": 27.0,
+    "surfaceAreaCm2": 165.52,
+    "bboxMm": {
+      "x": 109.5,
+      "y": 88.2,
+      "z": 29.25
+    },
+    "minWallThicknessMm": 4.0,
+    "boundaryEdges": 0,
+    "nonManifoldEdges": 0,
+    "degenerateTriangles": 0,
+    "isWatertight": true,
+    "hasOutwardNormals": true,
+    "fitsStandardFdmBed": true
+  },
+  "lowerMold": {
+    "triangleCount": 31424,
+    "signedVolumeCm3": 322.72,
+    "surfaceAreaCm2": 470.25,
+    "bboxMm": {
+      "x": 146.0,
+      "y": 126.0,
+      "z": 35.84
+    },
+    "minWallThicknessMm": 9.0,
+    "boundaryEdges": 0,
+    "nonManifoldEdges": 0,
+    "degenerateTriangles": 0,
+    "isWatertight": true,
+    "hasOutwardNormals": true,
+    "fitsStandardFdmBed": true
+  },
+  "upperMold": {
+    "triangleCount": 31424,
+    "signedVolumeCm3": 546.2,
+    "surfaceAreaCm2": 626.23,
+    "bboxMm": {
+      "x": 146.0,
+      "y": 126.0,
+      "z": 38.78
+    },
+    "minWallThicknessMm": 9.0,
+    "boundaryEdges": 0,
+    "nonManifoldEdges": 0,
+    "degenerateTriangles": 0,
+    "isWatertight": true,
+    "hasOutwardNormals": true,
+    "fitsStandardFdmBed": true
+  },
+  "economics": {
+    "aihProcedureCode": "04.03.01.001-2",
+    "aihReimbursementBrl": 1322.12,
+    "cementSigtapCode": "07.02.03.138-0",
+    "cementUnitCostBrl": 145.42,
+    "cementKits": 1,
+    "cementTotalBrl": 145.42,
+    "miniplateSigtapCode": "07.02.05.048-2",
+    "miniplateCostBrl": 361.81,
+    "pmmaMassGrams": 31.86,
+    "petgGrams": 463,
+    "petgCostBrl": 78.71,
+    "estimatedPrintHours": 11.0,
+    "sterilizationCostBrl": 60.0,
+    "estimatedTotalKitCostBrl": 645.94,
+    "commercialOpmeRefBrl": 160000.0,
+    "savingsVsCommercialPct": 99.6,
+    "fitsWithinAih": true
+  },
+  "generatedFiles": [
+    "implante_pmma_craniectomy18.stl",
+    "molde_negativo_inferior_craniectomy18.stl",
+    "molde_negativo_superior_craniectomy18.stl"
+  ]
+}
